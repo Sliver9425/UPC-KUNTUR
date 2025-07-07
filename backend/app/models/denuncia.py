@@ -12,4 +12,5 @@ class Denuncia(Base):
     ubicacion = Column(String, nullable=False)
     url = Column(String, nullable=False)
     unidades = Column(Integer, nullable=False)
+    codigo = Column(String(200), nullable=True)  # 👈 Nuevo campo
     fecha = Column(DateTime, default=datetime.utcnow)

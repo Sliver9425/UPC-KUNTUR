@@ -1,20 +1,26 @@
+# services/ia.py
 import os
-import openai
+import google.generativeai as genai
+from dotenv import load_dotenv
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+load_dotenv()
 
-def estimar_unidades(prompt: str) -> int:
-    if not openai.api_key:
-        print("[SIMULACIÓN] No se encontró OPENAI_API_KEY, devolviendo valor fijo.")
-        return 2  # valor simulado por defecto
-    
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}]
-        )
-        unidades = int(''.join(filter(str.isdigit, response.choices[0].message.content)))
-        return unidades
-    except Exception as e:
-        print(f"Error con OpenAI: {e}")
-        return 1  # Valor de respaldo en caso de error
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+def estimar_unidades_y_codigo(prompt: str) -> dict:
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    response = model.generate_content(prompt)
+
+    # Inicializamos valores por defecto
+    unidades = 1
+    codigo = "Desconocido"
+
+    if response.text:
+        for line in response.text.splitlines():
+            line = line.strip().lower()
+            if line.startswith("unidades:"):
+                unidades = int(''.join(filter(str.isdigit, line)))
+            elif line.startswith("código:") or line.startswith("codigo:"):
+                codigo = line.split(":")[1].strip().upper()
+
+    return {"unidades": unidades, "codigo": codigo}
