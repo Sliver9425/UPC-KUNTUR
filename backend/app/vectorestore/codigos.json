@@ -1,0 +1,134 @@
+[
+  {
+    "codigo": "12-31",
+    "descripcion": "Aísle sitio de suceso"
+  },
+  {
+    "codigo": "5-11",
+    "descripcion": "Robo"
+  },
+  {
+    "codigo": "8-27",
+    "descripcion": "Herida de bala"
+  },
+  {
+    "codigo": "5-12",
+    "descripcion": "Incendio"
+  },
+  {
+    "codigo": "8-85",
+    "descripcion": "Posible bomba"
+  },
+  {
+    "codigo": "5-42",
+    "descripcion": "Asalto a Banco"
+  },
+  {
+    "codigo": "5-39",
+    "descripcion": "Robo a mano armada"
+  },
+  {
+    "codigo": "8-01",
+    "descripcion": "Homicidio"
+  },
+  {
+    "codigo": "8-14",
+    "descripcion": "Riña callejera"
+  },
+  {
+    "codigo": "5-13",
+    "descripcion": "Individuo armado"
+  },
+  {
+    "codigo": "12-70",
+    "descripcion": "Refuerzo urgente"
+  },
+  {
+    "codigo": "5-26",
+    "descripcion": "Detenido peligroso"
+  },
+  {
+    "codigo": "5-10",
+    "descripcion": "Hurto en la calle"
+  },
+  {
+    "codigo": "8-23",
+    "descripcion": "Persona sospechosa"
+  },
+  {
+    "codigo": "6-01",
+    "descripcion": "Accidente de Tránsito"
+  },
+  {
+    "codigo": "6-06",
+    "descripcion": "Choque"
+  },
+  {
+    "codigo": "6-18",
+    "descripcion": "Derrumbe en la vía"
+  },
+  {
+    "codigo": "6-19",
+    "descripcion": "Traslado de heridos"
+  },
+  {
+    "codigo": "8-15",
+    "descripcion": "Secuestro"
+  },
+  {
+    "codigo": "3-05",
+    "descripcion": "Ataque a Policía"
+  },
+  {
+    "codigo": "3-06",
+    "descripcion": "Policía herido"
+  },
+  {
+    "codigo": "12-34",
+    "descripcion": "Concurra bomberos"
+  },
+  {
+    "codigo": "12-54",
+    "descripcion": "Concurra equipo antidroga"
+  },
+  {
+    "codigo": "5-24",
+    "descripcion": "Narcóticos"
+  },
+  {
+    "codigo": "5-25",
+    "descripcion": "Inundación"
+  },
+  {
+    "codigo": "5-17",
+    "descripcion": "Escándalo en la vía"
+  },
+  {
+    "codigo": "8-33",
+    "descripcion": "Estupro"
+  },
+  {
+    "codigo": "8-34",
+    "descripcion": "Estafa"
+  },
+  {
+    "codigo": "5-03",
+    "descripcion": "Estafa"
+  },
+  {
+    "codigo": "5-36",
+    "descripcion": "Funcionamiento ilegal"
+  },
+  {
+    "codigo": "5-38",
+    "descripcion": "Vagos"
+  },
+  {
+    "codigo": "5-23",
+    "descripcion": "Personas piden auxilio"
+  },
+  {
+    "codigo": "8-19",
+    "descripcion": "Personas pidiendo auxilio"
+  }
+]

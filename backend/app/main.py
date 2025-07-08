@@ -1,32 +1,38 @@
 from fastapi import FastAPI, WebSocket, UploadFile, File, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 import os
 
-from .services.ia import estimar_unidades_y_codigo  # 🔁 Usa nueva función LangChain
+from .services.ia import estimar_unidades_y_codigo  # 👈 función que usa LangChain + Gemini
 from .services.backblaze import subir_archivo_backblaze
 from .ws.manager import WebSocketManager
-
 from .deps import get_db
-from sqlalchemy.orm import Session
 from .models.denuncia import Denuncia, Base
 from .database import engine
-
 from .routers.denuncias import router as denuncias_router
 
+# Crear instancia de la app
 app = FastAPI()
 
+# Configurar CORS para permitir conexiones desde cualquier origen (útil para pruebas)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Cambiar en producción
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-ws_manager = WebSocketManager()
+# Crear las tablas en la base de datos
 Base.metadata.create_all(bind=engine)
+
+# Incluir rutas del router de denuncias si se usa archivo aparte
 app.include_router(denuncias_router)
 
+# Inicializar WebSocket manager
+ws_manager = WebSocketManager()
+
+# Endpoint principal de recepción de denuncias
 @app.post("/denuncia")
 async def recibir_denuncia(
     descripcion: str = Form(...),
@@ -34,13 +40,13 @@ async def recibir_denuncia(
     archivo: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
-    # Subir archivo a Backblaze
+    # 1. Subir archivo a Backblaze
     url = await subir_archivo_backblaze(archivo)
 
-    # Prompt con contexto y formato requerido
+    # 2. Generar prompt para IA
     prompt = f"""
     Clasifica el tipo de delito y responde SOLO en este formato:
-    
+
     Unidades: <número de unidades policiales>
     Código: <código policial real más adecuado>
 
@@ -49,23 +55,24 @@ async def recibir_denuncia(
     Evidencia: {url}
     """
 
-    resultado = estimar_unidades_y_codigo(prompt)
-    unidades = resultado["unidades"]
-    codigo = resultado["codigo"]
+    # 3. Estimar unidades y código con LangChain + Gemini
+    resultado = estimar_unidades_y_codigo(descripcion, ubicacion, url)
+    unidades = resultado.get("unidades", 1)
+    codigo = resultado.get("codigo", "N/A")
 
-    # Guardar la denuncia en base de datos
+    # 4. Guardar en base de datos
     denuncia = Denuncia(
         descripcion=descripcion,
         ubicacion=ubicacion,
         url=url,
         unidades=unidades,
-        codigo=codigo  # Asegúrate de que el modelo tenga este campo
+        codigo=codigo  # 👈 Asegúrate que este campo exista en el modelo
     )
     db.add(denuncia)
     db.commit()
     db.refresh(denuncia)
 
-    # Enviar alerta a WebSocket
+    # 5. Notificar a clientes WebSocket conectados
     await ws_manager.broadcast({
         "tipo": "nueva_denuncia",
         "descripcion": descripcion,
@@ -75,14 +82,21 @@ async def recibir_denuncia(
         "codigo": codigo
     })
 
-    return {"status": "ok", "unidades": unidades, "codigo": codigo, "id": denuncia.id}
+    # 6. Respuesta
+    return {
+        "status": "ok",
+        "unidades": unidades,
+        "codigo": codigo,
+        "id": denuncia.id
+    }
 
+# WebSocket para alertas en tiempo real
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
     await ws_manager.connect(ws)
     try:
         while True:
-            await ws.receive_text()
+            await ws.receive_text()  # No se usa entrada, pero permite mantener conexión
     except:
         await ws_manager.disconnect(ws)
 

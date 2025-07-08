@@ -1,26 +1,74 @@
-# services/ia.py
 import os
-import google.generativeai as genai
-from dotenv import load_dotenv
+import json
+from dotenv import load_dotenv  # ✅ para cargar la API key
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.output_parsers import StrOutputParser
 
+# ✅ Carga las variables del .env
 load_dotenv()
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+# Ruta absoluta al archivo de códigos policiales
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CODES_PATH = os.path.normpath(os.path.join(BASE_DIR, "..", "vectorestore", "codigos.json"))
 
-def estimar_unidades_y_codigo(prompt: str) -> dict:
-    model = genai.GenerativeModel("gemini-1.5-flash")
-    response = model.generate_content(prompt)
+# Leer los códigos
+with open(CODES_PATH, "r", encoding="utf-8") as f:
+    codigos_policiales = json.load(f)
 
-    # Inicializamos valores por defecto
-    unidades = 1
-    codigo = "Desconocido"
+# Formatear los códigos en texto plano para el prompt
+codigos_texto = "\n".join(f"{c['codigo']}: {c['descripcion']}" for c in codigos_policiales)
 
-    if response.text:
-        for line in response.text.splitlines():
-            line = line.strip().lower()
-            if line.startswith("unidades:"):
-                unidades = int(''.join(filter(str.isdigit, line)))
-            elif line.startswith("código:") or line.startswith("codigo:"):
-                codigo = line.split(":")[1].strip().upper()
+# Inicializar modelo Gemini 1.5 Flash
+llm = ChatGoogleGenerativeAI(
+    model="gemini-1.5-flash",
+    google_api_key=os.getenv("GEMINI_API_KEY"),  # ✅ se toma desde el .env
+    temperature=0.2
+)
 
-    return {"unidades": unidades, "codigo": codigo}
+# Output parser para respuestas de texto
+parser = StrOutputParser()
+
+# Template del prompt con variables
+template = """
+Eres un asistente especializado en coordinación de emergencias. Con base en la denuncia recibida, responde usando los CÓDIGOS POLICIALES.
+
+CÓDIGOS POLICIALES DISPONIBLES:
+{codigos}
+
+DENUNCIA:
+Descripción: {descripcion}
+Ubicación: {ubicacion}
+Evidencia: {url}
+
+RESPONDE SOLO en el siguiente formato:
+
+Código: <código más adecuado>
+Unidades: <número de unidades necesarias>
+"""
+
+prompt = ChatPromptTemplate.from_template(template)
+
+# Función principal llamada desde main.py
+def estimar_unidades_y_codigo(descripcion: str, ubicacion: str, url: str) -> dict:
+    chain = prompt | llm | parser
+
+    response = chain.invoke({
+        "codigos": codigos_texto,
+        "descripcion": descripcion,
+        "ubicacion": ubicacion,
+        "url": url
+    })
+
+    # Procesar respuesta: ejemplo -> "Código: 5-11\nUnidades: 3"
+    resultado = {"codigo": "N/A", "unidades": 1}
+    try:
+        for line in response.splitlines():
+            if "Código" in line:
+                resultado["codigo"] = line.split(":")[1].strip()
+            if "Unidades" in line:
+                resultado["unidades"] = int(''.join(filter(str.isdigit, line)))
+    except Exception as e:
+        print(f"[WARN] No se pudo parsear la respuesta correctamente: {e}")
+
+    return resultado
