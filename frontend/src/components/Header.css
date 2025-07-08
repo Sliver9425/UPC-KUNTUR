@@ -1,0 +1,31 @@
+   /* frontend/src/components/Header.css */
+   .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    padding: 1.2rem 2rem;
+    box-shadow: 0 2px 8px rgba(56, 76, 129, 0.08);
+  }
+  .logo {
+    height: 60px;
+    margin-right: 1.5rem;
+  }
+  .app-title {
+    color: #fff;
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    margin: 0;
+    text-shadow: 0 2px 8px rgba(56, 76, 129, 0.25);
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  }
+  
+  .app-subtitle {
+    color: #e0e0e0;
+    font-size: 1rem;
+    font-weight: 400;
+    margin-top: 0.2rem;
+    margin-left: 0.2rem;
+    letter-spacing: 0.08em;
+  }
