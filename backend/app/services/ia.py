@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from dotenv import load_dotenv  # ✅ para cargar la API key
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -43,8 +44,8 @@ Evidencia: {url}
 
 RESPONDE SOLO en el siguiente formato:
 
-Código: <código más adecuado>
-Unidades: <número de unidades necesarias>
+Código: <código más adecuado>- <significado del código policial
+Mensaje: <mensaje formal dirigido al operador, indicando cuántas unidades han sido despachadas y el motivo, usando lenguaje policial>
 """
 
 prompt = ChatPromptTemplate.from_template(template)
@@ -60,14 +61,44 @@ def estimar_unidades_y_codigo(descripcion: str, ubicacion: str, url: str) -> dic
         "url": url
     })
 
-    # Procesar respuesta: ejemplo -> "Código: 5-11\nUnidades: 3"
-    resultado = {"codigo": "N/A", "unidades": 1}
+    resultado = {"codigo": "N/A", "unidades": 1, "significado": "", "mensaje": ""}
+
     try:
-        for line in response.splitlines():
-            if "Código" in line:
-                resultado["codigo"] = line.split(":")[1].strip()
-            if "Unidades" in line:
-                resultado["unidades"] = int(''.join(filter(str.isdigit, line)))
+        # Extraer la línea de código y significado
+        match_codigo = re.search(r'Código:\s*([^\-]+)-\s*(.+)', response)
+        if match_codigo:
+            resultado["codigo"] = match_codigo.group(1).strip()
+            resultado["significado"] = match_codigo.group(2).strip()
+        else:
+            # Fallback: solo código
+            match_codigo_simple = re.search(r'Código:\s*(.+)', response)
+            if match_codigo_simple:
+                resultado["codigo"] = match_codigo_simple.group(1).strip()
+
+        # Extraer el mensaje formal
+        match_mensaje = re.search(r'Mensaje:\s*(.+)', response, re.DOTALL)
+        if match_mensaje:
+            resultado["mensaje"] = match_mensaje.group(1).strip()
+
+            # Extraer número de unidades del mensaje (busca "unidades" seguido de un número o palabra)
+            match_unidades = re.search(r'(\d+)\s+unidades|una unidad|dos unidades|tres unidades|cuatro unidades|cinco unidades', resultado["mensaje"], re.IGNORECASE)
+            if match_unidades:
+                # Si es número
+                if match_unidades.group(1):
+                    resultado["unidades"] = int(match_unidades.group(1))
+                else:
+                    # Si es palabra, mapea a número
+                    palabras_a_numeros = {
+                        "una unidad": 1,
+                        "dos unidades": 2,
+                        "tres unidades": 3,
+                        "cuatro unidades": 4,
+                        "cinco unidades": 5
+                    }
+                    for palabra, numero in palabras_a_numeros.items():
+                        if palabra in resultado["mensaje"].lower():
+                            resultado["unidades"] = numero
+                            break
     except Exception as e:
         print(f"[WARN] No se pudo parsear la respuesta correctamente: {e}")
 

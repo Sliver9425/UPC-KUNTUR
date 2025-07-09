@@ -77,8 +77,10 @@ async def recibir_denuncia(
         "descripcion": descripcion,
         "ubicacion": ubicacion,
         "url": url_evidencia,
-        "unidades": unidades,
-        "codigo": codigo
+        "unidades": resultado.get("unidades", 1),
+        "codigo": resultado.get("codigo", "N/A"),
+        "significado": resultado.get("significado", ""),
+        "mensaje": resultado.get("mensaje", "")
     })
 
     return {
