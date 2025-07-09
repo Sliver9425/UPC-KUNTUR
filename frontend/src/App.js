@@ -1,17 +1,13 @@
 import React from 'react';
 import Header from './components/Header';
 import './components/Header.css';
+import Home from './pages/Home';
 
 function App() {
   return (
     <div>
       <Header />
-      <main style={{ padding: '2rem' }}>
-        <h2>Bienvenido a KUNTUR</h2>
-        <p>
-          Plataforma para la gestión y visualización de denuncias.
-        </p>
-      </main>
+      <Home />
     </div>
   );
 }
