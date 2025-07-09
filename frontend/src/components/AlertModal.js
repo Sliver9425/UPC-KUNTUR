@@ -1,19 +1,21 @@
-// src/components/AlertModal.js
 import React from 'react';
 
-export default function AlertModal({ onClose }) {
+export default function AlertModal({ data, onClose }) {
+  if (!data) return null;
+
   return (
     <div className="alert-modal-overlay">
       <div className="alert-modal">
         <img src="/kunturlogo-red.svg" alt="Kuntur Alerta" className="alert-modal-logo" />
         <h2>🚨 Nueva Alerta de Denuncia</h2>
         <div className="alert-modal-details">
-          <div><b>Título:</b> Robo en Solanda</div>
-          <div><b>Fecha:</b> 2024-07-03</div>
-          <div><b>Estado:</b> En análisis</div>
-          <div><b>Ubicación:</b> Quito</div>
+          <div><b>Descripción:</b> {data.descripcion}</div>
+          <div><b>Ubicación:</b> {data.ubicacion}</div>
+          <div><b>Código:</b> {data.codigo}</div>
+          <div><b>Unidades:</b> {data.unidades}</div>
+          <div><b>Evidencia:</b> <a href={data.url} target="_blank" rel="noopener noreferrer">Ver archivo</a></div>
         </div>
-        <button className="btn-submit" onClick={onClose}>Ver resultado de análisis IA</button>
+        <button className="btn-submit" onClick={onClose}>Cerrar</button>
       </div>
     </div>
   );

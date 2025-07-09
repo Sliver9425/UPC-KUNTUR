@@ -1,17 +1,19 @@
-// src/components/ReportCard.js
 import React from 'react';
 
-export default function ReportCard({ status, title, date, image }) {
+export default function ReportCard({ descripcion, ubicacion, fecha, codigo, unidades, url }) {
   return (
     <div className="report-card">
       <div className="report-info">
-        <div className="report-status">Status: {status}</div>
-        <div className="report-title"><b>{title}</b></div>
-        <div className="report-date">Submitted: {date}</div>
-        <button className="btn-details">View Details</button>
-      </div>
-      <div className="report-image">
-        <img src={image} alt={title} />
+        <div><b>Descripción:</b> {descripcion}</div>
+        <div><b>Ubicación:</b> {ubicacion}</div>
+        <div><b>Fecha:</b> {new Date(fecha).toLocaleString()}</div>
+        <div><b>Código:</b> {codigo ?? 'N/A'}</div>
+        <div><b>Unidades:</b> {unidades}</div>
+        {url && (
+          <div>
+            <b>Evidencia:</b> <a href={url} target="_blank" rel="noopener noreferrer">Ver archivo</a>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -110,8 +110,8 @@ body {
   z-index: 1000;
 }
 .alert-logo.active {
-  width: 130px;      /* antes 90px */
-  height: 130px;     /* antes 90px */
+  width: 180px;      /* antes 90px */
+  height: 180px;     /* antes 90px */
   background: #ffeaea;
   animation: pulse 1s infinite alternate;
 }

@@ -10,3 +10,7 @@ router = APIRouter()
 @router.get("/denuncias", response_model=List[DenunciaOut])
 def listar_denuncias(db: Session = Depends(get_db)):
     return db.query(Denuncia).order_by(Denuncia.fecha.desc()).all()
+
+@router.get("/denuncias/ultimas", response_model=List[DenunciaOut])
+def ultimas_denuncias(db: Session = Depends(get_db)):
+    return db.query(Denuncia).order_by(Denuncia.fecha.desc()).limit(3).all()

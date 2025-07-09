@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
 import AlertModal from './AlertModal';
 
-export default function AlertLogo() {
+export default function AlertLogo({ alertActive, alertData, onClose }) {
   const [showModal, setShowModal] = useState(false);
-  const [alertActive, setAlertActive] = useState(false); // Cambia a true cuando haya alerta
+
+  const handleClick = () => {
+    if (alertActive) setShowModal(true);
+  };
+
+  const handleClose = () => {
+    setShowModal(false);
+    onClose();
+  };
 
   return (
     <>
       <div
         className={`alert-logo ${alertActive ? 'active' : ''}`}
-        onClick={() => alertActive && setShowModal(true)}
+        onClick={handleClick}
         title="Alerta Kuntur"
       >
         <img
@@ -17,7 +25,7 @@ export default function AlertLogo() {
           alt="Kuntur Logo"
         />
       </div>
-      {showModal && <AlertModal onClose={() => setShowModal(false)} />}
+      {showModal && <AlertModal data={alertData} onClose={handleClose} />}
     </>
   );
 }

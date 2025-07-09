@@ -1,15 +1,35 @@
-// src/components/ReportList.js
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import ReportCard from './ReportCard';
 
-const reports = [
-  // Mock data, reemplaza por datos reales
-  { id: 1, status: 'Active', title: 'Report on Vandalism', date: '2024-01-15', image: '/img1.jpg' },
-  { id: 2, status: 'Pending', title: 'Report on Theft', date: '2024-02-20', image: '/img2.jpg' },
-  { id: 3, status: 'Completed', title: 'Report on Assault', date: '2024-03-10', image: '/img3.jpg' },
-];
+export default function ReportList({ refresh, onNewAlert }) {
+  const [reports, setReports] = useState([]);
+  const ws = useRef(null);
 
-export default function ReportList() {
+  // Función para obtener las 3 últimas denuncias
+  const fetchReports = () => {
+    fetch('http://localhost:8000/denuncias/ultimas')
+      .then(res => res.json())
+      .then(data => setReports(data))
+      .catch(() => setReports([]));
+  };
+
+  useEffect(() => {
+    fetchReports();
+
+    ws.current = new WebSocket('ws://localhost:8000/ws');
+    ws.current.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.tipo === 'nueva_denuncia') {
+        fetchReports(); // Actualiza el listado cuando llega una nueva denuncia
+        if (onNewAlert) onNewAlert(data); // Activa la alerta
+      }
+    };
+
+    return () => {
+      if (ws.current) ws.current.close();
+    };
+  }, [refresh]);
+
   return (
     <div>
       {reports.map(report => (
