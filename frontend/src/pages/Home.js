@@ -30,7 +30,7 @@ export default function Home() {
     <div className="main-layout">
       <div className="left-column">
         <h2>Ultimas denuncias</h2>
-        <ReportList onNewAlert={handleNewAlert} />
+        <ReportList refresh={refreshReports} onNewAlert={handleNewAlert} />
       </div>
       <div className="right-column">
         <h2>Crear nueva denuncia</h2>

@@ -7,3 +7,4 @@ boto3
 python-multipart
 langchain
 langchain-google-genai
+fpdf
