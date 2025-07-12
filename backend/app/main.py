@@ -1,8 +1,10 @@
-from fastapi import FastAPI, WebSocket, UploadFile, File, Form, Depends, HTTPException
+from fastapi import FastAPI, WebSocket, UploadFile, File, Form, Depends, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from typing import Optional
 import os
+import requests
 
 from .services.ia import estimar_unidades_y_codigo
 from .services.backblaze import subir_archivo_backblaze, subir_archivo_local_backblaze
@@ -14,7 +16,7 @@ from .routers.denuncias import router as denuncias_router
 from fpdf import FPDF
 import tempfile
 import uuid
-
+import cv2
 # Crear instancia de la app
 app = FastAPI()
 
@@ -43,6 +45,7 @@ async def recibir_denuncia(
     ubicacion: str = Form(...),
     archivo: Optional[UploadFile] = File(None),
     url: Optional[str] = Form(None),
+    url_stream: Optional[str] = Form(None),  # <-- NUEVO
     db: Session = Depends(get_db)
 ):
     # Validar entrada
@@ -61,6 +64,8 @@ async def recibir_denuncia(
     resultado = estimar_unidades_y_codigo(descripcion, ubicacion, str(url_evidencia))
     unidades = resultado.get("unidades", 1)
     codigo = resultado.get("codigo", "N/A")
+    mensaje = resultado.get("mensaje", "")
+    significado = resultado.get("significado", "")
 
     # Guardar denuncia en la base de datos
     denuncia = Denuncia(
@@ -68,7 +73,9 @@ async def recibir_denuncia(
         ubicacion=ubicacion,
         url=url_evidencia,
         unidades=unidades,
-        codigo=codigo
+        codigo=codigo,
+        mensaje=mensaje,         # NUEVO
+        significado=significado  # NUEVO
     )
     db.add(denuncia)
     db.commit()
@@ -83,7 +90,8 @@ async def recibir_denuncia(
         "unidades": resultado.get("unidades", 1),
         "codigo": resultado.get("codigo", "N/A"),
         "significado": resultado.get("significado", ""),
-        "mensaje": resultado.get("mensaje", "")
+        "mensaje": resultado.get("mensaje", ""),
+        "url_stream": url_stream
     })
 
     return {
@@ -108,8 +116,19 @@ def generar_pdf_denuncia(denuncia, output_path):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, "Parte Policial", ln=True, align="C")
-    pdf.ln(10)
+
+    # Obtén la ruta absoluta del logo, relativa a este archivo
+    logo_path = os.path.join(os.path.dirname(__file__), "static", "kunturlogo.png")
+    if not os.path.exists(logo_path):
+        raise FileNotFoundError(f"Logo no encontrado en: {logo_path}")
+
+    pdf.image(logo_path, x=10, y=8, w=30)
+
+    pdf.set_xy(50, 10)
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 10, "PARTE POLICIAL", ln=True, align="C")
+    pdf.ln(20)
+    pdf.set_font("Arial", size=12)
     pdf.cell(200, 10, f"ID: {denuncia.id}", ln=True)
     pdf.cell(200, 10, f"Descripción: {denuncia.descripcion}", ln=True)
     pdf.cell(200, 10, f"Ubicación: {denuncia.ubicacion}", ln=True)
@@ -139,3 +158,21 @@ def generar_parte_pdf(id: int, db: Session = Depends(get_db)):
     os.remove(tmp_path)
 
     return {"url_pdf": url_pdf}
+
+def gen_frames():
+    url = "http://192.168.100.4:4747/video"
+    stream = requests.get(url, stream=True)
+    bytes_data = b''
+    for chunk in stream.iter_content(chunk_size=1024):
+        bytes_data += chunk
+        a = bytes_data.find(b'\xff\xd8')
+        b = bytes_data.find(b'\xff\xd9')
+        if a != -1 and b != -1:
+            jpg = bytes_data[a:b+2]
+            bytes_data = bytes_data[b+2:]
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + jpg + b'\r\n')
+
+@app.get("/video_feed")
+def video_feed():
+    return StreamingResponse(gen_frames(), media_type='multipart/x-mixed-replace; boundary=frame')

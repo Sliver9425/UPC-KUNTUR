@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function ReportCard({ id, descripcion, ubicacion, fecha, codigo, significado, mensaje, unidades, url }) {
+export default function ReportCard({ id, descripcion, ubicacion, fecha, codigo, significado, mensaje, unidades, url, url_stream }) {
   // Función para descargar el PDF del parte policial
   const handleDownloadPDF = async (e) => {
     e.preventDefault();
@@ -45,6 +45,14 @@ export default function ReportCard({ id, descripcion, ubicacion, fecha, codigo, 
             <b>Parte Policial (PDF):</b>{" "}
             <a href="#" onClick={handleDownloadPDF} style={{ color: "#74409B", fontWeight: "bold" }}>
               Descargar PDF
+            </a>
+          </div>
+        )}
+        {/* NUEVO: Mostrar si hay transmisión disponible */}
+        {url_stream && (
+          <div style={{ marginTop: '0.5rem' }}>
+            <b>Transmisión:</b> <a href={url_stream} target="_blank" rel="noopener noreferrer" style={{ color: "#74409B", fontWeight: "bold" }}>
+              Ver en vivo
             </a>
           </div>
         )}

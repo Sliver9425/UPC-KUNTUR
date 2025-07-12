@@ -8,3 +8,5 @@ python-multipart
 langchain
 langchain-google-genai
 fpdf
+opencv-python
+requests
