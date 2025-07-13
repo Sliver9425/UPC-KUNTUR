@@ -1,5 +1,3 @@
----
-
 # 🛡️ **Kuntur UPC** 👮‍♂️📡
 
 *Sistema inteligente para recepción, análisis y despacho de denuncias en tiempo real desde una Unidad de Policía Comunitaria.*
