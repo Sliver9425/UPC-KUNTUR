@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Float
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime, timezone
 
@@ -18,3 +18,5 @@ class Denuncia(Base):
     mensaje = Column(String, nullable=True)
     significado = Column(String, nullable=True)
     url_stream = Column(String, nullable=True)
+    latitud = Column(Float, nullable=True)
+    longitud = Column(Float, nullable=True)

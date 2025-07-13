@@ -8,6 +8,7 @@ import requests
 
 from .services.ia import estimar_unidades_y_codigo
 from .services.backblaze import subir_archivo_backblaze, subir_archivo_local_backblaze
+from .services.geolocalizacion import obtener_direccion_desde_coordenadas
 from .ws.manager import WebSocketManager
 from .deps import get_db
 from .models.denuncia import Denuncia, Base
@@ -38,21 +39,24 @@ app.include_router(denuncias_router)
 # WebSocket manager
 ws_manager = WebSocketManager()
 
-# 📌 Endpoint para recibir denuncias con evidencia como archivo o URL
 @app.post("/denuncia")
 async def recibir_denuncia(
     descripcion: str = Form(...),
-    ubicacion: str = Form(...),
+    ubicacion: Optional[str] = Form(None),      # Texto libre
+    latitud: Optional[float] = Form(None),      # Coordenadas
+    longitud: Optional[float] = Form(None),     # Coordenadas
     archivo: Optional[UploadFile] = File(None),
     url: Optional[str] = Form(None),
-    url_stream: Optional[str] = Form(None),  # <-- NUEVO
+    url_stream: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
-    # Validar entrada
-    if not archivo and not url:
-        raise HTTPException(status_code=400, detail="Debe enviar una evidencia como archivo o como URL")
-    if archivo and url:
-        raise HTTPException(status_code=400, detail="No puede enviar archivo y URL al mismo tiempo")
+    # Procesar ubicación
+    if latitud is not None and longitud is not None:
+        direccion_final = obtener_direccion_desde_coordenadas(latitud, longitud)
+    elif ubicacion:
+        direccion_final = ubicacion
+    else:
+        direccion_final = "Ubicación no especificada"
 
     # Usar Backblaze si se subió archivo
     if archivo:
@@ -61,7 +65,7 @@ async def recibir_denuncia(
         url_evidencia = url
 
     # Estimar unidades y código policial
-    resultado = estimar_unidades_y_codigo(descripcion, ubicacion, str(url_evidencia))
+    resultado = estimar_unidades_y_codigo(descripcion, direccion_final, str(url_evidencia))
     unidades = resultado.get("unidades", 1)
     codigo = resultado.get("codigo", "N/A")
     mensaje = resultado.get("mensaje", "")
@@ -70,12 +74,15 @@ async def recibir_denuncia(
     # Guardar denuncia en la base de datos
     denuncia = Denuncia(
         descripcion=descripcion,
-        ubicacion=ubicacion,
+        ubicacion=direccion_final,
+        latitud=latitud,
+        longitud=longitud,
         url=url_evidencia,
         unidades=unidades,
         codigo=codigo,
-        mensaje=mensaje,         # NUEVO
-        significado=significado  # NUEVO
+        mensaje=mensaje,
+        significado=significado,
+        url_stream=url_stream
     )
     db.add(denuncia)
     db.commit()
@@ -85,12 +92,14 @@ async def recibir_denuncia(
     await ws_manager.broadcast({
         "tipo": "nueva_denuncia",
         "descripcion": descripcion,
-        "ubicacion": ubicacion,
+        "ubicacion": direccion_final,
+        "latitud": latitud,
+        "longitud": longitud,
         "url": url_evidencia,
-        "unidades": resultado.get("unidades", 1),
-        "codigo": resultado.get("codigo", "N/A"),
-        "significado": resultado.get("significado", ""),
-        "mensaje": resultado.get("mensaje", ""),
+        "unidades": unidades,
+        "codigo": codigo,
+        "significado": significado,
+        "mensaje": mensaje,
         "url_stream": url_stream
     })
 
@@ -98,7 +107,10 @@ async def recibir_denuncia(
         "status": "ok",
         "unidades": unidades,
         "codigo": codigo,
-        "id": denuncia.id
+        "id": denuncia.id,
+        "ubicacion": direccion_final,
+        "latitud": latitud,
+        "longitud": longitud
     }
 
 # 🛰 WebSocket para notificaciones en tiempo real
