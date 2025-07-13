@@ -3,6 +3,7 @@ import uuid
 import boto3
 from fastapi import UploadFile
 from dotenv import load_dotenv
+import mimetypes
 
 load_dotenv()  # Carga variables de entorno del .env
 
@@ -24,14 +25,36 @@ async def subir_archivo_backblaze(archivo: UploadFile) -> str:
     # Sube el archivo a Backblaze
     try:
         s3.upload_fileobj(
-    archivo.file,
-    BUCKET_NAME,
-    file_key,
-    ExtraArgs={"ContentType": archivo.content_type, "ContentDisposition": "inline"}
-)
-
+            archivo.file,
+            BUCKET_NAME,
+            file_key,
+            ExtraArgs={"ContentType": archivo.content_type, "ContentDisposition": "inline"}
+        )
     except Exception as e:
         print("Error subiendo archivo a Backblaze:", e)
+        raise e
+
+    url = f"https://{BUCKET_NAME}.s3.us-east-005.backblazeb2.com/{file_key}"
+    return url
+
+def subir_archivo_local_backblaze(file_path: str, file_key: str) -> str:
+    """
+    Sube un archivo local (por ejemplo, un PDF generado) a Backblaze y retorna la URL pública.
+    """
+    content_type, _ = mimetypes.guess_type(file_path)
+    try:
+        with open(file_path, "rb") as f:
+            s3.upload_fileobj(
+                f,
+                BUCKET_NAME,
+                file_key,
+                ExtraArgs={
+                    "ContentType": content_type or "application/pdf",
+                    "ContentDisposition": "inline"
+                }
+            )
+    except Exception as e:
+        print("Error subiendo archivo local a Backblaze:", e)
         raise e
 
     url = f"https://{BUCKET_NAME}.s3.us-east-005.backblazeb2.com/{file_key}"

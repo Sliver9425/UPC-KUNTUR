@@ -7,9 +7,14 @@ class DenunciaOut(BaseModel):
     ubicacion: str
     url: str
     unidades: int
-    codigo: str | None  # 👈 Añadido: puede ser nulo
+    codigo: str | None
     fecha: datetime
+    # NUEVO:
+    mensaje: str | None = None
+    significado: str | None = None
+    url_stream: str | None = None
+    latitud: float | None = None
+    longitud: float | None = None
 
     class Config:
-        orm_mode = True
-
+        from_attributes = True
