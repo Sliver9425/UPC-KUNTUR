@@ -40,7 +40,39 @@ body {
   box-shadow: 0 2px 8px rgba(56, 76, 129, 0.08);
   margin-bottom: 1.5rem;
   padding: 1.5rem;
+  align-items: flex-start;
+  transition: all 0.2s ease;
+}
+
+.report-card:hover {
+  box-shadow: 0 4px 16px rgba(56, 76, 129, 0.15);
+  transform: translateY(-2px);
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 1rem;
+  gap: 0.5rem;
+}
+
+.category-badge,
+.priority-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.category-icon {
+  font-size: 1rem;
 }
 
 .report-info {
