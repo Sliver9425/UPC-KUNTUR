@@ -129,25 +129,39 @@ def generar_pdf_denuncia(denuncia, output_path):
     pdf.add_page()
     pdf.set_font("Arial", size=12)
 
-    # Obtén la ruta absoluta del logo, relativa a este archivo
+    # Logo centrado
     logo_path = os.path.join(os.path.dirname(__file__), "static", "kunturlogo.png")
     if not os.path.exists(logo_path):
         raise FileNotFoundError(f"Logo no encontrado en: {logo_path}")
 
-    pdf.image(logo_path, x=10, y=8, w=30)
+    # Centrar el logo (asumiendo ancho de página 210mm y logo de 30mm)
+    page_width = pdf.w
+    logo_width = 30
+    x_logo = (page_width - logo_width) / 2
+    pdf.image(logo_path, x=x_logo, y=8, w=logo_width)
 
-    pdf.set_xy(50, 10)
+    pdf.ln(30)  # Espacio después del logo
     pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 10, "PARTE POLICIAL", ln=True, align="C")
-    pdf.ln(20)
+    pdf.cell(0, 10, "KUNTUR UPC", ln=True, align="C")
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, f"ID: {denuncia.id}", ln=True)
-    pdf.cell(200, 10, f"Descripción: {denuncia.descripcion}", ln=True)
-    pdf.cell(200, 10, f"Ubicación: {denuncia.ubicacion}", ln=True)
-    pdf.cell(200, 10, f"Código: {denuncia.codigo}", ln=True)
-    pdf.cell(200, 10, f"Unidades: {denuncia.unidades}", ln=True)
-    pdf.cell(200, 10, f"Evidencia: {denuncia.url}", ln=True)
-    pdf.cell(200, 10, f"Fecha: {denuncia.fecha}", ln=True)
+    pdf.cell(0, 10, "Unidad: UPC Kuntur 1", ln=True, align="C")
+    pdf.ln(10)
+
+    # Usar multi_cell para todos los campos
+    pdf.set_font("Arial", size=12)
+    pdf.cell(0, 10, "Ubicación:", ln=True)
+    pdf.multi_cell(0, 10, denuncia.ubicacion or "-")
+    pdf.cell(0, 10, "ID Denuncia:", ln=True)
+    pdf.multi_cell(0, 10, str(denuncia.id))
+    pdf.cell(0, 10, "Mensaje:", ln=True)
+    pdf.multi_cell(0, 10, denuncia.mensaje or "-")
+    pdf.cell(0, 10, "Evidencia:", ln=True)
+    pdf.multi_cell(0, 10, denuncia.url or "-")
+    pdf.cell(0, 10, "Fecha:", ln=True)
+    pdf.multi_cell(0, 10, str(denuncia.fecha))
+    pdf.cell(0, 10, "Disposición final:", ln=True)
+    pdf.multi_cell(0, 10, "Dirigido a JusticIA")
+
     pdf.output(output_path)
 
 # Endpoint para generar y subir el PDF del parte policial a Backblaze
@@ -172,7 +186,7 @@ def generar_parte_pdf(id: int, db: Session = Depends(get_db)):
     return {"url_pdf": url_pdf}
 
 def gen_frames():
-    url = "http://192.168.100.4:4747/video"
+    url = "http://192.168.1.42:4747/video"
     stream = requests.get(url, stream=True)
     bytes_data = b''
     for chunk in stream.iter_content(chunk_size=1024):
