@@ -16,7 +16,7 @@ export default function AlertLogo({ alertActive, alertData, onClose }) {
   return (
     <>
       <div
-        className={`alert-logo ${alertActive ? 'active' : ''}`}
+        className={`alert-logo floating-alert-icon${alertActive ? ' active' : ''}`}
         onClick={handleClick}
         title="Alerta Kuntur"
       >

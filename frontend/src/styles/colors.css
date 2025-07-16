@@ -1,6 +1,16 @@
 :root {
-    --color-primary: #74409B;
-    --color-secondary: #384C81;
-    --color-bg: #f8f8fa;
-    --color-text: #222;
-  }
+  --color-primary: #74409B;
+  --color-secondary: #384C81;
+  --color-bg: #f8f8fa;
+  --color-text: #222;
+  --primary-purple: #7B68EE;
+  --primary-red: #DC2626;
+  --background-light: #F8FAFC;
+  --card-background: #FFFFFF;
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --border-light: #E5E7EB;
+  --success-green: #10B981;
+  --warning-amber: #F59E0B;
+  --footer-height: 80px;
+}

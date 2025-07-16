@@ -84,7 +84,7 @@ export default function ReportForm({ onSubmitSuccess }) {
         onChange={handleUrlChange}
         disabled={!!evidenceFile}
       />      
-      <button type="submit" className="btn-submit">Submit</button>
+      <button type="Ingresar" className="btn-submit">Ingresar</button>
     </form>
   );
 }

@@ -28,14 +28,14 @@ export default function Home() {
 
   return (
     <div className="main-layout">
-      <div className="left-column">
-        <h2>Ultimas denuncias</h2>
+      <section className="left-column">
+        <h2>Últimas denuncias</h2>
         <ReportList refresh={refreshReports} onNewAlert={handleNewAlert} />
-      </div>
-      <div className="right-column">
+      </section>
+      <section className="right-column">
         <h2>Crear nueva denuncia</h2>
         <ReportForm />
-      </div>
+      </section>
       <AlertLogo alertActive={alertActive} alertData={alertData} onClose={handleCloseAlert} />
     </div>
   );
