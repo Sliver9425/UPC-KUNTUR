@@ -1,70 +1,105 @@
-# Getting Started with Create React App
+## 🧠 ¿Qué es "Kuntur UPC"?
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Es una plataforma de *seguridad ciudadana asistida por IA* que permite:
 
-## Available Scripts
+* Recibir denuncias vía web.
+* Subir evidencias multimedia.
+* Usar *IA generativa (Gemini)* para interpretar el incidente.
+* Clasificarlo por *código policial*.
+* Generar y subir automáticamente un *PDF* del parte policial.
+* Enviar alertas en *tiempo real a la policía (UPC)* y a *JusticIA*.
+* Integrarse con cámaras IP (streaming en vivo).
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 🔄 Análisis del Diagrama (imagen)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 1. *Origen de datos*
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+* *Cámaras, **micrófonos*, o formularios web son las fuentes de denuncia.
+* Se visualiza una interfaz web de usuario con botones de alerta y formularios.
 
-### `npm test`
+### 2. *Monitoreo en tiempo real*
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+* Los eventos se procesan en el dashboard "Kuntur Web", que se comunica con:
 
-### `npm run build`
+  * *Backblaze B2*: para guardar evidencia.
+  * *IA (Gemini)*: para analizar la denuncia.
+  * *MongoDB*: almacenamiento de resultados (solo si se activa esa persistencia).
+  * *UPC*: recepción de alertas y opción para enviar agentes.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 3. *Actores clave*
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+* *MongoDB*: almacena resultados enriquecidos.
+* *Pantalla UPC*: muestra video + botón para "enviar agentes".
+* *JusticIA*: recibe automáticamente el parte en PDF.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## 📁 Estructura y propósito de carpetas
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 📂 backend/ → FastAPI (Python)
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+| Archivo/Carpeta               | Función                                                           |
+| ----------------------------- | ----------------------------------------------------------------- |
+| main.py                     | Entrada principal: recibe denuncias, genera PDF, lanza WebSocket. |
+| routers/denuncias.py        | Endpoints /denuncias, /denuncia/{id}/parte_pdf.               |
+| schemas/                    | Validación Pydantic (entrada y salida).                           |
+| models/denuncia.py          | Modelo de base de datos denuncias.                              |
+| services/ia.py              | Usa LangChain + Gemini para interpretar denuncias.                |
+| services/backblaze.py       | Sube archivos y PDFs a Backblaze B2.                              |
+| services/geolocalizacion.py | Usa OpenStreetMap para obtener dirección desde coordenadas.       |
+| services/pdf.py             | Alternativa para generar parte policial en PDF.                   |
+| vectorestore/codigos.json   | Códigos policiales disponibles para la IA.                        |
+| ws/manager.py               | Maneja conexiones WebSocket (clientes UPC/JusticIA).              |
+| test_opencv_ffmpeg.py       | Prueba de compatibilidad con streams MJPEG vía OpenCV.            |
+| requirements.txt            | Librerías requeridas.                                             |
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 📂 frontend/ → ReactJS
 
-## Learn More
+| Archivo/Carpeta                 | Función                                             |
+| ------------------------------- | --------------------------------------------------- |
+| components/                   | Componentes reutilizables como:                     |
+| ReportForm.js                 | Formulario para ingresar nueva denuncia.            |
+| ReportList.js                 | Muestra últimas denuncias.                          |
+| ReportCard.js                 | Cada denuncia mostrada con detalles y descarga PDF. |
+| AlertModal.js                 | Modal emergente cuando hay alerta nueva.            |
+| AlertLogo.js                  | Botón flotante que activa AlertModal.             |
+| pages/Home.js                 | Página principal que une todo.                      |
+| public/                       | Archivos estáticos como index.html.               |
+| styles/colors.css y App.css | Estilos visuales.                                   |
+| package.json                  | Dependencias y scripts del frontend.                |
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🔧 Flujo resumido (desde el formulario hasta JusticIA)
 
-### Code Splitting
+mermaid
+graph TD
+A[Formulario Web (usuario)] -->|POST /denuncia| B[FastAPI backend]
+B --> C[IA Gemini (análisis)]
+B --> D[Backblaze B2 (subida evidencia)]
+B --> E[PostgreSQL (registro)]
+B --> F[WebSocket: Enviar alerta]
+F --> G[Pantalla UPC (video + botón)]
+E --> H[PDF parte generado y subido]
+H --> I[JusticIA (recibe PDF)]
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 📦 Tecnologías usadas
 
-### Making a Progressive Web App
+* *Backend*: FastAPI, SQLAlchemy, PostgreSQL, boto3, LangChain, Gemini, WebSocket.
+* *Frontend*: React, framer-motion, react-icons, WebSocket client.
+* *Otros*: Backblaze B2 (almacenamiento), OpenCV (video), FPDF (PDF), MongoDB (opcional).
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+---
 
-### Advanced Configuration
+## 🧩 Casos de uso clave
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+* *Vecino* sube evidencia → *IA analiza y genera parte* → *UPC recibe alerta y decide acción* → *JusticIA recibe documentación formal*.
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+---
