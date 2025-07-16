@@ -1,8 +1,23 @@
 @import './colors.css';
 
+
+/* Variables sugeridas */
+:root {
+  --primary-purple: #7B68EE;
+  --primary-red: #DC2626;
+  --background-light: #F8FAFC;
+  --card-background: #FFFFFF;
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --border-light: #E5E7EB;
+  --success-green: #10B981;
+  --warning-amber: #F59E0B;
+}
+
+/* Layout principal */
 body {
-  background: var(--color-bg);
-  color: var(--color-text);
+  background: var(--background-light);
+  color: var(--text-primary);
   font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
   margin: 0;
   padding: 0;
@@ -10,62 +25,91 @@ body {
 
 .main-layout {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2rem;
   padding: 2rem 3rem;
   min-height: 90vh;
-  background: #f8f8fa;
-  position: relative;
+  background: var(--background-light);
 }
 
 .left-column {
-  flex: 2;
+  flex: 2 1 400px;
+  min-width: 320px;
   margin-right: 2rem;
 }
 
 .right-column {
-  flex: 1;
-  background: #fff;
+  flex: 1 1 340px;
+  min-width: 320px;
+  background: var(--card-background);
   border-radius: 16px;
   padding: 2rem;
   box-shadow: 0 2px 16px rgba(56, 76, 129, 0.08);
-  min-width: 340px;
 }
 
+/* Grid para las cards */
+.reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Card de denuncia */
 .report-card {
-  display: flex;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(56, 76, 129, 0.08);
+  border-left: 6px solid var(--primary-purple);
+  box-shadow: 0 4px 16px rgba(56, 76, 129, 0.08);
   margin-bottom: 1.5rem;
   padding: 1.5rem;
+  border-radius: 16px;
+  background: var(--card-background);
+  transition: box-shadow 0.2s, transform 0.2s;
+  outline: none;
+}
+.report-card:hover, .report-card:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+/* Jerarquía visual */
+.report-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  display: flex;
   align-items: center;
 }
-
-.report-info {
-  flex: 2;
+.report-meta {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  gap: 1.5rem;
 }
-
-.report-image img {
-  width: 140px;
-  height: 90px;
-  object-fit: cover;
-  border-radius: 12px;
-  margin-left: 1.5rem;
+.report-badges {
+  margin-bottom: 0.5rem;
 }
-
-.btn-details {
-  margin-top: 1rem;
-  background: var(--color-secondary);
-  color: #fff;
-  border: none;
+.badge {
+  display: inline-block;
+  background: var(--background-light);
+  color: var(--primary-purple);
   border-radius: 8px;
-  padding: 0.5rem 1.2rem;
-  font-weight: bold;
-  cursor: pointer;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.9rem;
+  margin-right: 0.5rem;
+  font-weight: 600;
+}
+.badge-unidades {
+  background: var(--success-green);
+  color: #fff;
+}
+.report-message {
+  margin-top: 0.5rem;
+  font-style: italic;
+  color: var(--primary-purple);
 }
 
+/* Formulario de denuncia */
 .report-form label {
   display: block;
   margin-top: 1rem;
@@ -77,28 +121,75 @@ body {
   width: 100%;
   padding: 0.7rem;
   border-radius: 8px;
-  border: 1px solid #eee;
+  border: 1px solid var(--border-light);
   background: #f4f4f4;
   margin-bottom: 1rem;
   font-size: 1rem;
+  transition: border-color 0.2s;
+}
+.report-form input:focus,
+.report-form textarea:focus {
+  border-color: var(--primary-red);
+  box-shadow: 0 0 0 2px #f3e8ff;
+  background: #fff;
+}
+.input-error {
+  border-color: var(--primary-red);
+}
+.error-message {
+  color: var(--primary-red);
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
 }
 .btn-submit {
-  background: var(--color-primary);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 0.7rem 2rem;
-  font-weight: bold;
-  cursor: pointer;
-  float: right;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 1.15rem;
+  position: relative;
+}
+.btn-submit:hover,
+.btn-submit:focus {
+  background: var(--primary-purple);
+}
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #fff;
+  border-top: 3px solid var(--primary-purple);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
+/* Dropzone para drag & drop */
+.dropzone {
+  border: 2px dashed var(--primary-purple);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  color: var(--primary-purple);
+  margin-bottom: 1rem;
+  background: #faf7ff;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.dropzone.active {
+  border-color: var(--primary-red);
+  background: #fff0f0;
+}
+
+/* Alert logo y modal */
 .alert-logo {
   position: fixed;
   right: 2rem;
-  bottom: 2rem;
-  width: 100px;      /* antes 60px */
-  height: 100px;     /* antes 60px */
+  width: 100px;
+  height: 100px;
   background: #fff;
   border-radius: 50%;
   box-shadow: 0 2px 8px rgba(56, 76, 129, 0.18);
@@ -109,9 +200,12 @@ body {
   transition: all 0.3s;
   z-index: 1000;
 }
+.floating-alert-icon {
+  bottom: calc(2rem + var(--footer-height));
+}
 .alert-logo.active {
-  width: 180px;      /* antes 90px */
-  height: 180px;     /* antes 90px */
+  width: 180px;
+  height: 180px;
   background: #ffeaea;
   animation: pulse 1s infinite alternate;
 }
@@ -125,12 +219,10 @@ body {
     background: #fff0f0;
   }
 }
-
 .alert-logo img {
   width: 85%;
   height: 85%;
 }
-
 .alert-modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -140,17 +232,309 @@ body {
   justify-content: center;
   z-index: 2000;
 }
-
-.alert-modal-overlay {
-  /* ... */
-  z-index: 2000;
-} /* <-- cierre correcto */
 .alert-modal {
   background: #fff;
-  /* ... */
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  box-shadow: 0 4px 24px rgba(56, 76, 129, 0.18);
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
 }
 
-.report-form input[type="file"] {
-  margin-top: 0.5rem;
+/* Responsive */
+@media (max-width: 900px) {
+  .main-layout {
+    flex-direction: column;
+    padding: 1rem;
+  }
+  .left-column, .right-column {
+    margin-right: 0;
+    min-width: 0;
+  }
+  .alert-logo {
+    right: 1rem;
+    bottom: 1rem;
+    width: 70px;
+    height: 70px;
+  }
+  .alert-logo.active {
+    width: 120px;
+    height: 120px;
+  }
+}
+@media (max-width: 600px) {
+  .main-layout {
+    padding: 0.5rem;
+  }
+  .right-column, .left-column {
+    padding: 1rem;
+  }
+  .alert-modal {
+    padding: 1rem;
+  }
+}
+
+.footer {
+  background: #5B4FC7;
+  color: #FFFFFF;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.2rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  margin-top: 2rem;
+}
+.footer-dark {
+  background: #403266;
+  color: #F3F4F6;
+}
+.social-icons {
+  display: flex;
+  gap: 15px;
+  margin-left: 20px;
+}
+
+.social-icon {
+  color: #FFFFFF;
+  opacity: 0.8;
+  transition: all 0.2s;
+}
+
+.social-icon:hover {
+  opacity: 1;
+  color: #DC2626;
+  transform: translateY(-2px);
+}
+/* Otros estilos opcionales */
+a {
+  color: var(--primary-purple);
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+a:hover, a:focus {
+  color: var(--primary-red);
+  text-decoration: none;
+}
+
+/* Layout para la tarjeta de denuncia con imagen */
+.denuncia-card-with-image {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 2rem;
+  background: var(--card-background);
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(56, 76, 129, 0.08);
+  padding: 2rem 1.5rem;
   margin-bottom: 1.5rem;
+}
+.denuncia-image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 260px;
+  max-width: 350px;
+  flex: 1 1 260px;
+}
+.denuncia-image {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(56, 76, 129, 0.10);
+  object-fit: contain;
+  background: #fff;
+}
+.denuncia-form-container {
+  flex: 2 1 340px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+@media (max-width: 900px) {
+  .denuncia-card-with-image {
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0.5rem;
+  }
+  .denuncia-image-container {
+    max-width: 100%;
+    min-width: 0;
+    margin-bottom: 1rem;
+  }
+  .denuncia-form-container {
+    width: 100%;
+  }
+}
+
+.denuncia-card-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--card-background);
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(56, 76, 129, 0.08);
+  padding: 2.5rem 2rem 2rem 2rem;
+  margin-bottom: 1.5rem;
+}
+.denuncia-image-centered {
+  width: 100%;
+  max-width: 340px;
+  height: auto;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(56, 76, 129, 0.10);
+  object-fit: contain;
+  background: #fff;
+  margin-bottom: 1.2rem;
+}
+@media (max-width: 900px) {
+  .denuncia-card-centered {
+    padding: 1.2rem 0.5rem 1rem 0.5rem;
+  }
+  .denuncia-image-centered {
+    max-width: 95vw;
+  }
+}
+
+.main-layout-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--background-light);
+}
+.centered-content-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  width: 100%;
+  max-width: 1100px;
+  margin: 3rem 0 2.5rem 0;
+}
+.centered-image-container {
+  flex: 1 1 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.centered-image {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(56, 76, 129, 0.13);
+  object-fit: contain;
+  background: #fff;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.centered-image:hover {
+  box-shadow: 0 8px 32px rgba(56, 76, 129, 0.18);
+  transform: scale(1.03);
+}
+.centered-form-container {
+  flex: 1 1 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.form-card {
+  background: linear-gradient(135deg, #f7f3ff 60%, #e9e6fa 100%);
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(123, 104, 238, 0.13);
+  padding: 2.5rem 2rem 2rem 2rem;
+  width: 100%;
+  max-width: 420px;
+  border: 2.5px solid var(--primary-purple);
+  position: relative;
+}
+.form-card h2 {
+  color: var(--primary-purple);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  background: linear-gradient(90deg, #7B68EE 10%, #DC2626 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  margin-bottom: 1.5rem;
+}
+.report-form label {
+  color: var(--primary-purple);
+  font-weight: 600;
+}
+.report-form input:focus,
+.report-form textarea:focus {
+  border-color: var(--primary-purple);
+  box-shadow: 0 0 0 2px #e0d6ff;
+  background: #fff;
+}
+.btn-submit {
+  background: linear-gradient(90deg, var(--primary-purple) 60%, var(--primary-red) 100%);
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  padding: 0.9rem 2rem;
+  box-shadow: 0 2px 8px rgba(123, 104, 238, 0.10);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.btn-submit:hover,
+.btn-submit:focus {
+  background: linear-gradient(90deg, var(--primary-red) 10%, var(--primary-purple) 90%);
+  box-shadow: 0 4px 16px rgba(123, 104, 238, 0.18);
+}
+@media (max-width: 900px) {
+  .centered-content-row {
+    flex-direction: column;
+    gap: 1.5rem;
+    margin: 1.5rem 0 1.5rem 0;
+  }
+  .centered-image {
+    max-width: 90vw;
+  }
+  .form-card {
+    max-width: 98vw;
+    padding: 1.2rem 0.5rem 1rem 0.5rem;
+  }
+}
+.success-message {
+  color: var(--success-green);
+  font-size: 1.05rem;
+  margin-bottom: 0.7rem;
+  text-align: center;
+  font-weight: 600;
+  background: #e6f9f0;
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+}
+.report-form label {
+  margin-top: 1.2rem;
+}
+.report-form input,
+.report-form textarea {
+  margin-bottom: 0.5rem;
+}
+.form-separator {
+  height: 1px;
+  background: var(--border-light);
+  margin: 1.1rem 0 1.1rem 0;
+  border-radius: 2px;
+}
+.image-preview-container {
+  display: flex;
+  justify-content: center;
+  margin: 0.7rem 0 1.2rem 0;
+}
+.image-preview {
+  max-width: 180px;
+  max-height: 140px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(56, 76, 129, 0.10);
+  border: 1.5px solid var(--primary-purple);
+  object-fit: contain;
 }
