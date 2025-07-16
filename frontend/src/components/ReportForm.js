@@ -73,7 +73,7 @@ export default function ReportForm({ onSubmitSuccess }) {
       <input
         type="file"
         onChange={handleFileChange}
-        accept="image/*,application/pdf,video/*"
+          accept="image/*,application/pdf,video/*,audio/*,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         disabled={!!evidenceUrl}
       />
       <label>Evidencia (URL)</label>

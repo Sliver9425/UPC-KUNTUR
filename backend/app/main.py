@@ -88,6 +88,39 @@ async def recibir_denuncia(
     db.commit()
     db.refresh(denuncia)
 
+    # --- INICIO BLOQUE PDF Y ENVÍO ---
+    import tempfile
+    import uuid
+    import os
+    import requests
+
+    # 1. Generar PDF temporalmente
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        generar_pdf_denuncia(denuncia, tmp.name)
+        tmp_path = tmp.name
+
+    # 2. Subir PDF a Backblaze y obtener la URL
+    file_key = f"partes_policiales/{uuid.uuid4()}.pdf"
+    url_pdf = subir_archivo_local_backblaze(tmp_path, file_key)
+
+    # 3. Eliminar el archivo temporal
+    os.remove(tmp_path)
+
+    # 4. Enviar la URL al endpoint externo
+    payload = {
+        "id_denuncia": denuncia.id,
+        "url_pdf": url_pdf,
+        # Puedes agregar más datos si lo necesitas
+    }
+    try:
+        # Cambia la URL por la del backend externo cuando esté disponible
+        response = requests.post("https://url.de.la.otra.app/endpoint", json=payload)
+        response.raise_for_status()  # Lanza error si la respuesta no es 2xx
+    except Exception as e:
+        print("Error enviando el PDF al endpoint externo:", e)
+        # Aquí puedes decidir si solo loguear, reintentar, o notificar de alguna forma
+    # --- FIN BLOQUE PDF Y ENVÍO ---
+
     # Enviar notificación por WebSocket
     await ws_manager.broadcast({
         "tipo": "nueva_denuncia",
@@ -185,20 +218,30 @@ def generar_parte_pdf(id: int, db: Session = Depends(get_db)):
 
     return {"url_pdf": url_pdf}
 
-def gen_frames():
-    url = "http://192.168.1.42:4747/video"
-    stream = requests.get(url, stream=True)
-    bytes_data = b''
-    for chunk in stream.iter_content(chunk_size=1024):
-        bytes_data += chunk
-        a = bytes_data.find(b'\xff\xd8')
-        b = bytes_data.find(b'\xff\xd9')
-        if a != -1 and b != -1:
-            jpg = bytes_data[a:b+2]
-            bytes_data = bytes_data[b+2:]
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + jpg + b'\r\n')
-
-@app.get("/video_feed")
-def video_feed():
-    return StreamingResponse(gen_frames(), media_type='multipart/x-mixed-replace; boundary=frame')
+@app.get("/video_feed/{denuncia_id}")
+def video_feed(denuncia_id: int, db: Session = Depends(get_db)):
+    # 1. Buscar la denuncia
+    denuncia = db.query(Denuncia).get(denuncia_id)
+    if not denuncia:
+        raise HTTPException(status_code=404, detail="Denuncia no encontrada")
+    
+    # 2. Obtener la URL de la cámara
+    url_stream = denuncia.url_stream
+    if not url_stream:
+        raise HTTPException(status_code=400, detail="La denuncia no tiene cámara asociada")
+    
+    # 3. Usar la URL en gen_frames
+    def gen_frames(url):
+        stream = requests.get(url, stream=True)
+        bytes_data = b''
+        for chunk in stream.iter_content(chunk_size=1024):
+            bytes_data += chunk
+            a = bytes_data.find(b'\xff\xd8')
+            b = bytes_data.find(b'\xff\xd9')
+            if a != -1 and b != -1:
+                jpg = bytes_data[a:b+2]
+                bytes_data = bytes_data[b+2:]
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + jpg + b'\r\n')
+    
+    return StreamingResponse(gen_frames(url_stream), media_type='multipart/x-mixed-replace; boundary=frame')
