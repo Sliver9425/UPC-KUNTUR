@@ -35,4 +35,5 @@ Este repositorio contiene una aplicación web compuesta por un backend (Python/F
 
 ## Notas
 - Asegúrate de tener Python 3.8+ y Node.js instalados.
+- El frontend utiliza librerías npm adicionales para UI/UX modernas (ver README del frontend).
 - Consulta los README de cada subcarpeta para más detalles. 

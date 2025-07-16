@@ -22,6 +22,19 @@ npm install
 npm start
 ```
 
+## Dependencias principales
+
+- **react-icons**: Iconografía moderna y consistente para React.
+  - Instalación: `npm install react-icons`
+  - [Documentación oficial](https://react-icons.github.io/react-icons/)
+- **framer-motion**: Animaciones y transiciones fluidas en React.
+  - Instalación: `npm install framer-motion`
+  - [Documentación oficial](https://www.framer.com/motion/)
+- **react-dropzone**: Drag & drop para subida de archivos.
+  - Instalación: `npm install react-dropzone`
+  - [Documentación oficial](https://react-dropzone.js.org/)
+
 ## Notas
 - Requiere Node.js y npm instalados.
 - Puedes personalizar los estilos en `src/styles/`.
+- Consulta la documentación de cada librería para ejemplos avanzados.

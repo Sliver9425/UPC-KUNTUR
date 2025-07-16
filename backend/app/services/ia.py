@@ -65,15 +65,20 @@ def estimar_unidades_y_codigo(descripcion: str, ubicacion: str, url: str) -> dic
 
     try:
         # Extraer la línea de código y significado
-        match_codigo = re.search(r'Código:\s*([^\-]+)-\s*(.+)', response)
+        match_codigo = re.search(r'Código:\s*(\d+-\d+)\s*-\s*(.+)', response)
         if match_codigo:
             resultado["codigo"] = match_codigo.group(1).strip()
             resultado["significado"] = match_codigo.group(2).strip()
         else:
             # Fallback: solo código
-            match_codigo_simple = re.search(r'Código:\s*(.+)', response)
+            match_codigo_simple = re.search(r'Código:\s*(\d+-\d+)', response)
             if match_codigo_simple:
                 resultado["codigo"] = match_codigo_simple.group(1).strip()
+            else:
+                # Último recurso: captura cualquier número
+                match_codigo_num = re.search(r'Código:\s*(\d+)', response)
+                if match_codigo_num:
+                    resultado["codigo"] = match_codigo_num.group(1).strip()    
 
         # Extraer el mensaje formal
         match_mensaje = re.search(r'Mensaje:\s*(.+)', response, re.DOTALL)

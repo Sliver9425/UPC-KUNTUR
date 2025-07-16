@@ -12,7 +12,7 @@ function getGravedadPorCodigo(codigo) {
   ];
   const media = [
     "5-12", "6-01", "6-06", "6-18", "6-19", "5-26", "5-13", "5-25", "5-24",
-    "12-34", "12-54", "8-33", "8-34", "5-03"
+    "12-34", "12-54", "8-33", "8-34", "5-03","5-11"
   ];
   if (urgente.includes(codigo)) return "urgente";
   if (media.includes(codigo)) return "media";
