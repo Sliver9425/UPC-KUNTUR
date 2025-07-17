@@ -34,7 +34,8 @@ export default function ReportForm({ onSubmitSuccess }) {
 
 
     try {
-      const response = await fetch('http://localhost:8000/denuncia', {
+      const API_URL = process.env.REACT_APP_API_URL;
+      const response = await fetch(`${API_URL}/denuncia`, { 
         method: 'POST',
         body: formData,
       });

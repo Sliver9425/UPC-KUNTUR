@@ -5,10 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function ReportList({ refresh, onNewAlert }) {
   const [reports, setReports] = useState([]);
   const ws = useRef(null);
-
+  const API_URL = process.env.REACT_APP_API_URL;
+  const WS_URL = API_URL.replace(/^http/, 'ws');
   // Función para obtener las 3 últimas denuncias
   const fetchReports = () => {
-    fetch('http://localhost:8000/denuncias/ultimas')
+    
+    fetch(`${API_URL}/denuncias/ultimas`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -23,7 +25,8 @@ export default function ReportList({ refresh, onNewAlert }) {
   useEffect(() => {
     fetchReports();
 
-    ws.current = new WebSocket('ws://localhost:8000/ws');
+    
+    ws.current = new WebSocket(`${WS_URL}/ws`);
     ws.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.tipo === 'nueva_denuncia') {

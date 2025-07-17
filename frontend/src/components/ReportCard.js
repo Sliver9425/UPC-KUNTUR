@@ -1,5 +1,6 @@
 import React from 'react';
 import { FiMapPin, FiClock, FiFileText, FiVideo, FiDownload } from 'react-icons/fi';
+import { format, toZonedTime } from 'date-fns-tz';
 
 // Función para mapear código policial a gravedad
 function getGravedadPorCodigo(codigo) {
@@ -45,7 +46,8 @@ export default function ReportCard({
   const handleDownloadPDF = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:8000/denuncia/${id}/parte_pdf`);
+      const API_URL = process.env.REACT_APP_API_URL;
+      const res = await fetch(`${API_URL}/denuncia/${id}/parte_pdf`);
       const data = await res.json();
       if (data.url_pdf) {
         window.open(data.url_pdf, "_blank");
@@ -56,7 +58,10 @@ export default function ReportCard({
       alert("Error al solicitar el PDF.");
     }
   };
-
+  let fechaString = fecha.replace(' ', 'T').split('.')[0] + 'Z';
+  const fechaUtc = new Date(fechaString);
+  const fechaEcuador = toZonedTime(fechaUtc, 'America/Guayaquil');
+  const fechaFormateada = format(fechaEcuador, 'dd/MM/yyyy HH:mm:ss', { timeZone: 'America/Guayaquil' });
   return (
     <div
       className="report-card"
@@ -81,7 +86,7 @@ export default function ReportCard({
       {/* Metadatos */}
       <div className="report-meta" style={{ color: "var(--text-secondary)", fontSize: "0.95rem", marginBottom: 8, display: "flex", gap: "1.5rem" }}>
         <span><FiMapPin style={{ marginRight: 4 }} />{ubicacion}</span>
-        <span><FiClock style={{ marginRight: 4 }} />{new Date(fecha).toLocaleString('es-EC', { timeZone: 'America/Guayaquil' })}</span>
+        <span><FiClock style={{ marginRight: 4 }} />{fechaFormateada}</span>
       </div>
 
       {/* Badges */}
