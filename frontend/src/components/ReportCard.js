@@ -9,10 +9,10 @@ function getGravedadPorCodigo(codigo) {
   const cleanCodigo = match ? match[1] : '';
   console.log('codigo recibido:', codigo, '| cleanCodigo extraído:', cleanCodigo);
   const urgente = [
-    "8-01", "8-27", "8-85", "8-15", "3-05", "3-06", "12-70", "5-42", "5-39"
+    "8-01", "8-27", "8-85", "8-15", "3-05", "3-06", "12-70", "5-42", "5-39","5-13"
   ];
   const media = [
-    "5-12", "6-01", "6-06", "6-18", "6-19", "5-26", "5-13", "5-25", "5-24",
+    "5-12", "6-01", "6-06", "6-18", "6-19", "5-26", "5-25", "5-24",
     "12-34", "12-54", "8-33", "8-34", "5-03","5-11"
   ];
   if (urgente.includes(codigo)) return "urgente";
