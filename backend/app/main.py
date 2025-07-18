@@ -186,6 +186,8 @@ def generar_pdf_denuncia(denuncia, output_path):
     pdf.multi_cell(0, 10, denuncia.ubicacion or "-")
     pdf.cell(0, 10, "ID Denuncia:", ln=True)
     pdf.multi_cell(0, 10, str(denuncia.id))
+    pdf.cell(0, 10, "Descripción de la Denuncia:", ln=True )
+    pdf.multi_cell(0, 10, denuncia.descripcion or "-")
     pdf.cell(0, 10, "Mensaje:", ln=True)
     pdf.multi_cell(0, 10, denuncia.mensaje or "-")
     pdf.cell(0, 10, "Evidencia:", ln=True)
